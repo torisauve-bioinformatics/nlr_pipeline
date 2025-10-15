@@ -1,5 +1,5 @@
-params.genome_file="/Users/torisauve/Desktop/summer25/progress_report_test/UP000006548_3702.fasta"
-params.outdir="/Users/torisauve/Desktop/summer25/progress_report_test/output"
+params.genome_file = null
+params.outdir = './output'
 
 process run_nlrtracker {
 
@@ -10,7 +10,7 @@ process run_nlrtracker {
     output:
     path "nlrtracker_output/*", emit: results
     path "nlrtracker_output/nlrtracker.tsv", emit: nlrtracker_file
-    publishDir "${params.outdir}", mode: 'copy'
+    publishDir "${params.outdir}/nlrtracker_results", mode: 'copy'
    
 
     script:
@@ -54,7 +54,7 @@ process run_resistify {
     output:
     path "resistify_output/motifs.tsv", emit: motifs_file
 
-    publishDir "${params.outdir}", mode: 'copy'
+    publishDir "${params.outdir}/resistify_results", mode: 'copy'
 
 
     script:
