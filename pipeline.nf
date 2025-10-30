@@ -53,7 +53,7 @@ process run_resistify {
 
     output:
     path "resistify_output/motifs.tsv", emit: motifs_file
-
+    path "restify_output/*", emit: results
     publishDir "${params.outdir}/resistify_results", mode: 'copy'
 
 
