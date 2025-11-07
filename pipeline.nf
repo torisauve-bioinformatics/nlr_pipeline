@@ -2,6 +2,7 @@ params.genome_file = null
 params.outdir = './output'
 
 process run_nlrtracker {
+    
 
     input:
     path ref_ch
@@ -15,6 +16,7 @@ process run_nlrtracker {
 
     script:
     """
+   
     source /opt/conda/etc/profile.d/conda.sh
     conda activate nlrtracker
     /opt/NLRtracker/NLRtracker.sh -s ${ref_ch} -o nlrtracker_output -c 4 
@@ -52,8 +54,8 @@ process run_resistify {
 
 
     output:
+    path "resistify_output/*", emit: results
     path "resistify_output/motifs.tsv", emit: motifs_file
-    path "restify_output/*", emit: results
     publishDir "${params.outdir}/resistify_results", mode: 'copy'
 
 
