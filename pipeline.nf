@@ -10,41 +10,17 @@ process run_nlrtracker {
    
     output:
     path "nlrtracker_output/*", emit: results
-    path "nlrtracker_output/nlrtracker.tsv", emit: nlrtracker_file
+    path "nlrtracker_output/Domains.tsv", emit: nlrtracker_output
     publishDir "${params.outdir}/nlrtracker_results", mode: 'copy'
    
 
     script:
-    """
-   
+    """ 
+
     source /opt/conda/etc/profile.d/conda.sh
     conda activate nlrtracker
-    /opt/NLRtracker/NLRtracker.sh -s ${ref_ch} -o nlrtracker_output -c 4 
+    /opt/NLRtracker/NLRtracker.sh -s ${ref_ch} -o nlrtracker_output -c -c ${task.cpus} 
     """
-}
-
-process python_task_nlrtracker {
-    
-     input: 
-     path nlrtracker_tsv_path
-
-     output:
-     path "nlrtracker_df.pkl", emit: nlr_dataframe
-     
-
-     publishDir "${params.outdir}/nlrtracker_analysis", mode: 'copy' 
-
-     script: 
-     """
-     #!/usr/bin/env python
-     import pandas as pd
-     nlrtracker_df = pd.read_csv("$nlrtracker_tsv_path", sep='\\t')
-            
-      
-     nlrtracker_df.to_pickle("nlrtracker_df.pkl")
-            
-     """
-              
 }
 
 process run_resistify {
@@ -55,56 +31,51 @@ process run_resistify {
 
     output:
     path "resistify_output/*", emit: results
-    path "resistify_output/motifs.tsv", emit: motifs_file
+    path "resistify_output/domains.tsv", emit: resistify_output
     publishDir "${params.outdir}/resistify_results", mode: 'copy'
 
 
     script:
     """
+    
     source /opt/conda/etc/profile.d/conda.sh
     conda activate resistify
     resistify nlr ${ref_ch} -o resistify_output 
     """
 }
 
+process run_annotator {
+    
+    publishDir "${params.outdir}/nlrannotator_results", mode: 'copy'
 
-process python_task_resistify {
-     input:
-     path motifs_tsv
-        
-     output:
-     path "resistify_df.pkl", emit: resistify_dataframe
+    input:
+    path ref_ch
+    
+   
+    output:
+    path "nlrannotator_output/*", emit: results
+    
 
-     publishDir "${params.outdir}/resistify_analysis", mode: 'copy'
-    
-     script:
-     """
-     #!/usr/bin/env python
-    
-     import pandas as pd
-     resistify_df = pd.read_csv("$motifs_tsv", sep='\\t')
-     resistify_df.to_pickle("resistify_df.pkl")
-    
-    
-     """
-    
-     
-}   
-
+    script:
+    """
+    mkdir -p nlrannotator_output
+    java -jar /opt/NLR-Annotator/NLR-Annotator-v2.1b.jar \
+    -i ${ref_ch} \
+    -x /opt/NLR-Annotator/src/mot.txt \
+    -y /opt/NLR-Annotator/src/store.txt -o nlrannotator_output/output.txt \
+    -g nlrannotator_output/output.gff \
+    -b nlrannotator_output/output.bed \
+    """
+}
 
 workflow {
 
+    gff_ch = Channel.fromPath(params.gff_file)
+
     ref_ch=Channel.fromPath(params.genome_file) 
+       
+    run_nlrtracker(ref_ch)
+    run_resistify(ref_ch)
+    run_annotator(ref_ch)
     
-    run_nlrtracker(
-        ref_ch )
-
-    run_resistify(
-        ref_ch )
-
-    python_task_nlrtracker(
-        run_nlrtracker.out.nlrtracker_file  )
-    
-    python_task_resistify(run_resistify.out.motifs_file
-         )
 }
