@@ -25,4 +25,5 @@ nextflow run pipeline.nf \
   -profile docker \
   -c nextflow.config \
   --genome_file path/to/your/genome.fasta
+  --proteome_file path/to/your/protein.fasta
 ```
