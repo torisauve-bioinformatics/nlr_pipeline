@@ -1,11 +1,12 @@
 params.genome_file = null
+params.proteome_file = null
 params.outdir = './output'
 
 process run_nlrtracker {
     
 
     input:
-    path ref_ch
+    path prot_ch
     
    
     output:
@@ -26,7 +27,7 @@ process run_nlrtracker {
 process run_resistify {
 
     input:
-    path ref_ch
+    path prot_ch
 
 
     output:
@@ -74,8 +75,8 @@ workflow {
 
     ref_ch=Channel.fromPath(params.genome_file) 
        
-    run_nlrtracker(ref_ch)
-    run_resistify(ref_ch)
+    run_nlrtracker(prot_ch)
+    run_resistify(prot_ch)
     run_annotator(ref_ch)
     
 }
