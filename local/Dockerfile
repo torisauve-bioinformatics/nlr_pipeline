@@ -75,7 +75,7 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
     conda env create -f environment.yml -n nlrtracker
 
 
-# --- Install InterProScan 5-44.0 ---
+# --- Install InterProScan 5.53-87.0 ---
 
 WORKDIR /usr/local/src
 ENV INTERPROSCAN_VERSION="5.53-87.0"
